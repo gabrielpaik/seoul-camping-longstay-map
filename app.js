@@ -14,10 +14,13 @@ Promise.all([fetch('data.json').then(r=>r.json()),fetch('routes.json').then(r=>r
   const confirmed=items.filter(item=>item.coord==='정확 주소 기반');
   confirmed.forEach(item=>{
     const route=routes[item.name]; const color=item.operation==='부분 확인'?'#637172':'#1e5841';
-    const routeInfo=route?`<div class="route"><b>네이버 자동차 결과 · ${route.km}km / 약 ${route.min}분</b><br><small>${route.checkedAt} 조회 · 실제 출발지 비공개</small></div>`:'';
-    const official=item.official?`<a href="${item.official}" target="_blank" rel="noopener">공식 채널 ↗</a>`:'';
-    const booking=item.booking?`<a href="${item.booking}" target="_blank" rel="noopener">예약/정보 ↗</a>`:'';
-    L.marker([item.lat,item.lng],{icon:icon(color),title:item.name}).addTo(map).bindPopup(`<article class="popup"><h2>${item.name}</h2><div class="tags">${tag(item.area)}${tag(item.operation,item.operation==='부분 확인'?'warn':'')}</div>${routeInfo}<p><b>동계 장박</b> · ${item.winter}</p><p><b>가격/기간</b> · ${item.price}</p><p><b>주소</b> · ${item.address}</p><p>${item.note}</p><div class="links"><a href="${naver(item)}" target="_blank" rel="noopener">네이버 지도 ↗</a><a href="${kakao(item)}" target="_blank" rel="noopener">카카오 길찾기 ↗</a>${official}${booking}</div></article>`);
+    const photo=item.photoUrl||'assets/camp-photo-placeholder.svg';
+    const photoLabel=item.photoUrl?'공식·예약 채널 제공 사진':'사진 준비 중';
+    const source=item.photoSource?`<a href="${item.photoSource}" target="_blank" rel="noopener">사진 출처 ↗</a>`:'';
+    const official=item.official?`<a class="secondary" href="${item.official}" target="_blank" rel="noopener">공식</a>`:'';
+    const booking=item.booking?`<a class="secondary" href="${item.booking}" target="_blank" rel="noopener">예약</a>`:'';
+    const kpi=route?`${route.km}km <span>· 약 ${route.min}분</span>`:'경로 확인 보류';
+    L.marker([item.lat,item.lng],{icon:icon(color),title:item.name}).addTo(map).bindPopup(`<article class="popup card"><figure><img src="${photo}" alt="${item.name} ${photoLabel}" loading="lazy"><figcaption>${photoLabel}${source?` · ${source}`:''}</figcaption></figure><div class="card-body"><h2>${item.name}</h2><div class="tags">${tag(item.area)}${tag(item.operation,item.operation==='부분 확인'?'warn':'')}</div><div class="route-kpi">${kpi}</div><div class="facts"><div><small>동계 장박</small><b>${item.winter}</b></div><div><small>가격·기간</small><b>${item.price}</b></div></div><details><summary>상세 정보</summary><p><b>주소</b> · ${item.address}</p><p><b>조회</b> · ${route?.checkedAt||'대상 미확인'}</p><p>${item.note}</p></details><div class="links"><a class="primary" href="${kakao(item)}" target="_blank" rel="noopener">길찾기</a>${official}${booking}</div></div></article>`);
   });
   const bounds=L.latLngBounds(confirmed.map(x=>[x.lat,x.lng]));bounds.extend([home.lat,home.lng]);map.fitBounds(bounds,{padding:[46,46],maxZoom:10});
   document.querySelector('#count').textContent=`실제 위치·네이버 자동차 결과 확인 ${confirmed.length}개 · 출처·위치 미검증 제외 ${items.length-confirmed.length}개`;

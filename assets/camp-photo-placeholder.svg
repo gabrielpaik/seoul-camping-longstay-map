@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="캠핑장 사진 준비 중">
+  <rect width="800" height="450" fill="#dfe6d5"/>
+  <path d="M0 310 170 185l116 83 120-148 185 190 118-98 91 98v140H0Z" fill="#9dad8e"/>
+  <path d="M0 340 215 250l133 78 129-98 166 94 157-54v180H0Z" fill="#758b70"/>
+  <path d="m334 350 66-111 68 111Z" fill="none" stroke="#f7f1e5" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M302 352h200" stroke="#f7f1e5" stroke-width="10" stroke-linecap="round"/>
+  <text x="400" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#f7f1e5" letter-spacing="4">PHOTO PENDING</text>
+</svg>
