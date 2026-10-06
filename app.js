@@ -2,6 +2,7 @@ const home = { lat: 37.519, lng: 126.889, label: '우리 집(문래)' }; // 비�
 const tentSvg = color => `<svg viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="14" fill="${color}" stroke="#f7f1e5" stroke-width="1.8"/><path d="M8.3 23.6 16.9 10l8.8 13.6M12 23.6l4.9-7.3 5 7.3M16.9 16.3v7.3M6.9 24.5h20" fill="none" stroke="#f7f1e5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const homeSvg = `<svg viewBox="0 0 38 38" aria-hidden="true"><circle cx="19" cy="19" r="15.5" fill="#b77942" stroke="#f7f1e5" stroke-width="1.8"/><path d="m10.1 18 8.9-7.4 8.9 7.4v9.2H10.1zM15.7 27.2v-6.3h6.6v6.3" fill="none" stroke="#fdf8ed" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const map = L.map('map',{zoomControl:false,scrollWheelZoom:false}).setView([37.67,126.66],9.4);
+window.__campMap = map;
 L.control.zoom({position:'bottomright'}).addTo(map);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
 const icon = color => L.divIcon({className:'camp-marker',html:tentSvg(color),iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-18]});
@@ -9,7 +10,11 @@ const homeIcon = L.divIcon({className:'home-marker',html:homeSvg,iconSize:[38,38
 const tag=(t,c='')=>`<span class="tag ${c}">${t}</span>`;
 const naver=item=>`https://map.naver.com/p/search/${encodeURIComponent(item.name)}`;
 const kakao=item=>`https://map.kakao.com/link/from/${encodeURIComponent(home.label)},${home.lat},${home.lng}/to/${encodeURIComponent(item.name)},${item.lat},${item.lng}`;
-L.marker([home.lat,home.lng],{icon:homeIcon,title:home.label,zIndexOffset:1000}).addTo(map).bindPopup(`<article class="popup"><h2>${home.label}</h2><p>개인정보 보호를 위해 실제 주소·좌표와 다른 문래 권역 표시점입니다.</p></article>`);
+const isMobile=()=>window.matchMedia('(max-width:720px)').matches;
+const sheet=document.createElement('aside');sheet.className='mobile-sheet';sheet.setAttribute('aria-live','polite');document.querySelector('.map-shell').append(sheet);
+const openSheet=html=>{sheet.innerHTML=`<button class="sheet-close" type="button" aria-label="닫기">×</button>${html}`;sheet.classList.add('open');sheet.querySelector('.sheet-close').onclick=()=>sheet.classList.remove('open');};
+const addPopup=(marker,html)=>{marker.bindPopup(html,{autoPan:false,closeButton:true,autoClose:true});marker.on('click',()=>{if(isMobile()){marker.closePopup();openSheet(html)}});return marker;};
+addPopup(L.marker([home.lat,home.lng],{icon:homeIcon,title:home.label,zIndexOffset:1000,autoPanOnFocus:false,keyboard:false}).addTo(map),`<article class="popup"><h2>${home.label}</h2><p>개인정보 보호를 위해 실제 주소·좌표와 다른 문래 권역 표시점입니다.</p></article>`);
 Promise.all([fetch('data.json').then(r=>r.json()),fetch('routes.json').then(r=>r.json())]).then(([items,routes])=>{
   const confirmed=items.filter(item=>item.coord==='정확 주소 기반');
   confirmed.forEach(item=>{
@@ -20,7 +25,8 @@ Promise.all([fetch('data.json').then(r=>r.json()),fetch('routes.json').then(r=>r
     const official=item.official?`<a class="secondary" href="${item.official}" target="_blank" rel="noopener">공식</a>`:'';
     const booking=item.booking?`<a class="secondary" href="${item.booking}" target="_blank" rel="noopener">예약</a>`:'';
     const kpi=route?`${route.km}km <span>· 약 ${route.min}분</span>`:'경로 확인 보류';
-    L.marker([item.lat,item.lng],{icon:icon(color),title:item.name}).addTo(map).bindPopup(`<article class="popup card"><figure><img src="${photo}" alt="${item.name} ${photoLabel}" loading="lazy"><figcaption>${photoLabel}${source?` · ${source}`:''}</figcaption></figure><div class="card-body"><h2>${item.name}</h2><div class="tags">${tag(item.area)}${tag(item.operation,item.operation==='부분 확인'?'warn':'')}</div><div class="route-kpi">${kpi}</div><div class="facts"><div><small>동계 장박</small><b>${item.winter}</b></div><div><small>가격·기간</small><b>${item.price}</b></div></div><details><summary>상세 정보</summary><p><b>주소</b> · ${item.address}</p><p><b>조회</b> · ${route?.checkedAt||'대상 미확인'}</p><p>${item.note}</p></details><div class="links"><a class="primary" href="${kakao(item)}" target="_blank" rel="noopener">길찾기</a>${official}${booking}</div></div></article>`);
+    const content=`<article class="popup card"><figure><img src="${photo}" alt="${item.name} ${photoLabel}" loading="lazy"><figcaption>${photoLabel}${source?` · ${source}`:''}</figcaption></figure><div class="card-body"><h2>${item.name}</h2><div class="tags">${tag(item.area)}${tag(item.operation,item.operation==='부분 확인'?'warn':'')}</div><div class="route-kpi">${kpi}</div><div class="facts"><div><small>동계 장박</small><b>${item.winter}</b></div><div><small>가격·기간</small><b>${item.price}</b></div></div><details><summary>상세 정보</summary><p><b>주소</b> · ${item.address}</p><p><b>조회</b> · ${route?.checkedAt||'대상 미확인'}</p><p>${item.note}</p></details><div class="links"><a class="primary" href="${kakao(item)}" target="_blank" rel="noopener">길찾기</a>${official}${booking}</div></div></article>`;
+    addPopup(L.marker([item.lat,item.lng],{icon:icon(color),title:item.name,autoPanOnFocus:false,keyboard:false}).addTo(map),content);
   });
   const bounds=L.latLngBounds(confirmed.map(x=>[x.lat,x.lng]));bounds.extend([home.lat,home.lng]);map.fitBounds(bounds,{padding:[46,46],maxZoom:10});
   document.querySelector('#count').textContent=`실제 위치·네이버 자동차 결과 확인 ${confirmed.length}개 · 출처·위치 미검증 제외 ${items.length-confirmed.length}개`;
