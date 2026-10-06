@@ -1,19 +1,22 @@
 import fs from 'node:fs';
 
 const items = JSON.parse(fs.readFileSync(new URL('../data.json', import.meta.url)));
-const pages = JSON.parse(fs.readFileSync('/tmp/camping-db-verify.json')).results;
+const pages = JSON.parse(fs.readFileSync('/tmp/camping-db-real-routes.json')).results;
 const ids = new Map(pages.map(page => [page.properties['후보명'].title[0]?.plain_text, page.id]));
-const home = { lat: 37.5163, lng: 126.8958, label: '우리 집(문래동)' };
-const radians = value => value * Math.PI / 180;
+const routes = JSON.parse(fs.readFileSync(new URL('../routes.json', import.meta.url)));
+const home = { lat: 37.5190, lng: 126.8890, label: '우리 집(문래)' };
 
 for (const item of items) {
-  const a = Math.sin(radians(item.lat - home.lat) / 2) ** 2 + Math.cos(radians(home.lat)) * Math.cos(radians(item.lat)) * Math.sin(radians(item.lng - home.lng) / 2) ** 2;
-  const km = Math.round(2 * 6371 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 1.32);
-  const min = Math.round(km / 45 * 60 + 12);
   if (!ids.has(item.name)) throw new Error(`Missing Notion page: ${item.name}`);
-  console.log(JSON.stringify({
-    id: ids.get(item.name), km, min,
-    naver: `https://map.naver.com/p/directions/${home.lng},${home.lat},${encodeURIComponent(home.label)},PLACE_POI/${item.lng},${item.lat},${encodeURIComponent(item.name)},PLACE_POI/car`,
-    kakao: `https://map.kakao.com/link/from/${encodeURIComponent(home.label)},${home.lat},${home.lng}/to/${encodeURIComponent(item.name)},${item.lat},${item.lng}`
-  }));
+  const route = routes[item.name];
+  const naver = `https://map.naver.com/p/search/${encodeURIComponent(item.name)}`;
+  const kakao = `https://map.kakao.com/link/from/${encodeURIComponent(home.label)},${home.lat},${home.lng}/to/${encodeURIComponent(item.name)},${item.lat},${item.lng}`;
+  console.log(JSON.stringify({ id: ids.get(item.name), body: { properties: {
+    '실제 차량 거리(km)': { number: route?.km ?? null },
+    '실제 예상 시간(분)': { number: route?.min ?? null },
+    '길찾기 검증': { select: { name: route ? '네이버 자동차 결과 확인' : '대상 미확인·조회 보류' } },
+    '길찾기 근거': { rich_text: [{ text: { content: route ? `네이버 지도 자동차 길찾기 결과 · ${route.checkedAt} · 실제 주소/좌표 비공개` : '공식 대상 명칭/주소 미확인으로 잘못된 장소 매칭을 방지하기 위해 실제 경로 조회 보류' } }] },
+    '네이버 지도': { url: naver },
+    '카카오 길찾기': { url: kakao }
+  } } }));
 }
