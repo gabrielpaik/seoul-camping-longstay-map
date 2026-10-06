@@ -28,7 +28,7 @@ Promise.all([fetch('data.json').then(r => r.json()), fetch('routes.json').then(r
     const status = statusClass(item.operation);
     const routeInfo = route
       ? `<div class="route"><b>네이버 자동차 결과 · ${route.km}km / 약 ${route.min}분</b><br><small>${route.checkedAt} 조회 · 실제 주소·좌표 비공개</small></div>`
-      : '<div class="route"><b>실제 자동차 경로 조회 보류</b><br><small>대상 명칭/주소가 미확인이라 다른 장소로 임의 매칭하지 않았습니다.</small></div>';
+      : '<div class="route"><b>추천 제외 · 실제 자동차 경로 조회 보류</b><br><small>출처·위치가 미검증이라 다른 장소로 임의 매칭하지 않았습니다.</small></div>';
     const official = item.official ? `<a href="${item.official}" target="_blank" rel="noopener">공식 채널 ↗</a>` : '';
     const booking = item.booking ? `<a href="${item.booking}" target="_blank" rel="noopener">예약/정보 ↗</a>` : '';
     detail.innerHTML = `<h2>${item.name}</h2><div class="tags">${tag(item.area)}${tag(item.operation, status === 'unknown' ? 'bad' : status === 'partial' ? 'warn' : '')}${tag(`좌표: ${item.coord}`, 'warn')}</div>${routeInfo}<p><b>동계 장박</b> · ${item.winter}</p><p><b>가격/기간</b> · ${item.price}</p><p><b>주소</b> · ${item.address}</p><p>${item.note}</p><div class="links"><a href="${safeMapLink(item)}" target="_blank" rel="noopener">네이버 지도 ↗</a><a href="${kakaoLink(item)}" target="_blank" rel="noopener">카카오 길찾기 ↗</a>${official}${booking}</div>`;

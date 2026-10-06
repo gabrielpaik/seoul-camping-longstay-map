@@ -14,6 +14,13 @@ for (const item of items) {
   console.log(JSON.stringify({ id: ids.get(item.name), body: { properties: {
     '실제 차량 거리(km)': { number: route?.km ?? null },
     '실제 예상 시간(분)': { number: route?.min ?? null },
+    '권역': { select: { name: item.region } },
+    '운영·주소': { select: { name: item.operation } },
+    '주소': { rich_text: [{ text: { content: item.address } }] },
+    '공식 URL': { url: item.official || null },
+    '예약 URL': { url: item.booking || null },
+    '가격·기간': { rich_text: [{ text: { content: item.price } }] },
+    '검증 메모': { rich_text: [{ text: { content: item.note } }] },
     '길찾기 검증': { select: { name: route ? '네이버 자동차 결과 확인' : '대상 미확인·조회 보류' } },
     '길찾기 근거': { rich_text: [{ text: { content: route ? `네이버 지도 자동차 길찾기 결과 · ${route.checkedAt} · 실제 주소/좌표 비공개` : '공식 대상 명칭/주소 미확인으로 잘못된 장소 매칭을 방지하기 위해 실제 경로 조회 보류' } }] },
     '네이버 지도': { url: naver },
