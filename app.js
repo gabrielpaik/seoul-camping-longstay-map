@@ -1,26 +1,47 @@
-// 문래 권역의 비정밀 표시점. 실제 주소·좌표는 이 공개 지도에 포함하지 않는다.
-const home = { lat: 37.5190, lng: 126.8890, label: '우리 집(문래)' };
-const map = L.map('map', { zoomControl: false }).setView([37.63, 126.69], 9.3);
-L.control.zoom({ position: 'bottomright' }).addTo(map);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+const home = { lat: 37.519, lng: 126.889, label: '우리 집(문래)' };
+const bounds = { minLat: 37.15, maxLat: 38.15, minLng: 126.15, maxLng: 127.25 };
+const pins = document.querySelector('#pins');
+const detail = document.querySelector('#detail');
+
+const position = ({ lat, lng }) => ({
+  left: `${((lng - bounds.minLng) / (bounds.maxLng - bounds.minLng)) * 100}%`,
+  top: `${(1 - (lat - bounds.minLat) / (bounds.maxLat - bounds.minLat)) * 100}%`
+});
 const statusClass = value => value === '공식/공공 확인' ? 'verified' : value === '부분 확인' ? 'partial' : 'unknown';
-const tag = (text, cls = '') => `<span class="tag ${cls}">${text}</span>`;
-const naverPlace = item => `https://map.naver.com/p/search/${encodeURIComponent(item.name)}`;
-const kakaoDirections = item => `https://map.kakao.com/link/from/${encodeURIComponent(home.label)},${home.lat},${home.lng}/to/${encodeURIComponent(item.name)},${item.lat},${item.lng}`;
-const homeIcon = L.divIcon({ className: '', html: '<div class="home-pin"></div>', iconSize:[20,20], iconAnchor:[10,10], popupAnchor:[0,-12] });
-L.marker([home.lat, home.lng], { icon: homeIcon, title: home.label, zIndexOffset: 1000 }).addTo(map).bindPopup('<article class="card"><h2>우리 집(문래)</h2><p>개인정보 보호를 위해 실제 주소·좌표와 다른 문래 권역 표시점입니다.</p></article>');
+const tag = (value, style = '') => `<span class="tag ${style}">${value}</span>`;
+const safeMapLink = item => `https://map.naver.com/p/search/${encodeURIComponent(item.name)}`;
+const kakaoLink = item => `https://map.kakao.com/link/from/${encodeURIComponent(home.label)},${home.lat},${home.lng}/to/${encodeURIComponent(item.name)},${item.lat},${item.lng}`;
+
+const homePin = document.createElement('div');
+homePin.className = 'home-marker';
+Object.assign(homePin.style, position(home));
+homePin.innerHTML = `<span>${home.label}</span>`;
+pins.append(homePin);
+
 Promise.all([fetch('data.json').then(r => r.json()), fetch('routes.json').then(r => r.json())]).then(([items, routes]) => {
-  const bounds = [[home.lat, home.lng]];
-  items.forEach(item => {
-    const klass = statusClass(item.operation);
-    const icon = L.divIcon({ className: '', html: `<div class="pin ${klass}"></div>`, iconSize:[14,14], iconAnchor:[7,14], popupAnchor:[0,-13] });
+  const showDetail = item => {
+    document.querySelectorAll('.pin-button.active').forEach(pin => pin.classList.remove('active'));
+    document.querySelector(`[data-name="${CSS.escape(item.name)}"]`)?.classList.add('active');
+    const route = routes[item.name];
+    const status = statusClass(item.operation);
+    const routeInfo = route
+      ? `<div class="route"><b>네이버 자동차 결과 · ${route.km}km / 약 ${route.min}분</b><br><small>${route.checkedAt} 조회 · 실제 주소·좌표 비공개</small></div>`
+      : '<div class="route"><b>실제 자동차 경로 조회 보류</b><br><small>대상 명칭/주소가 미확인이라 다른 장소로 임의 매칭하지 않았습니다.</small></div>';
     const official = item.official ? `<a href="${item.official}" target="_blank" rel="noopener">공식 채널 ↗</a>` : '';
     const booking = item.booking ? `<a href="${item.booking}" target="_blank" rel="noopener">예약/정보 ↗</a>` : '';
-    const route = routes[item.name];
-    const routeMarkup = route ? `<p class="route"><b>네이버 자동차 결과</b> · ${route.km}km · 약 ${route.min}분<br><small>${route.checkedAt} 조회 · 실시간 재계산 필요</small></p>` : '<p class="route"><b>실제 자동차 경로</b> · 대상 명칭/주소 미확인으로 조회 보류</p>';
-    L.marker([item.lat,item.lng],{icon,title:item.name,riseOnHover:true}).addTo(map).bindPopup(`<article class="card"><h2>${item.name}</h2>${tag(item.area)}${tag(item.operation,klass === 'unknown' ? 'bad' : klass === 'partial' ? 'warn' : '')}${tag('좌표: '+item.coord,'warn')}${routeMarkup}<p><b>동계 장박</b> · ${item.winter}</p><p><b>가격/기간</b> · ${item.price}</p><p><b>주소</b> · ${item.address}</p><p>${item.note}</p><div class="links"><a href="${naverPlace(item)}" target="_blank" rel="noopener">네이버 지도 ↗</a><a href="${kakaoDirections(item)}" target="_blank" rel="noopener">카카오 길찾기 ↗</a>${official}${booking}</div></article>`);
-    bounds.push([item.lat,item.lng]);
+    detail.innerHTML = `<h2>${item.name}</h2><div class="tags">${tag(item.area)}${tag(item.operation, status === 'unknown' ? 'bad' : status === 'partial' ? 'warn' : '')}${tag(`좌표: ${item.coord}`, 'warn')}</div>${routeInfo}<p><b>동계 장박</b> · ${item.winter}</p><p><b>가격/기간</b> · ${item.price}</p><p><b>주소</b> · ${item.address}</p><p>${item.note}</p><div class="links"><a href="${safeMapLink(item)}" target="_blank" rel="noopener">네이버 지도 ↗</a><a href="${kakaoLink(item)}" target="_blank" rel="noopener">카카오 길찾기 ↗</a>${official}${booking}</div>`;
+  };
+  items.forEach(item => {
+    const pin = document.createElement('button');
+    pin.type = 'button';
+    pin.className = `pin-button ${statusClass(item.operation)}`;
+    pin.dataset.name = item.name;
+    pin.setAttribute('aria-label', `${item.name} 상세 보기`);
+    Object.assign(pin.style, position(item));
+    pin.addEventListener('mouseenter', () => showDetail(item));
+    pin.addEventListener('focus', () => showDetail(item));
+    pin.addEventListener('click', () => showDetail(item));
+    pins.append(pin);
   });
-  map.fitBounds(bounds, { padding:[34,34], maxZoom:10 });
-  document.getElementById('count').textContent = `${items.length}개 후보 핀 · 네이버 실제 자동차 결과(확인 후보만) 포함`;
+  document.querySelector('#count').textContent = `${items.length}개 후보 · 네이버 자동차 결과 ${Object.keys(routes).length}개 확인`;
 });

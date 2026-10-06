@@ -4,17 +4,30 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>서울 근교 겨울 장박 캠핑 후보 지도</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <main>
-      <header><div><p class="eyebrow">2026-10-06 · VERIFIED CANDIDATES</p><h1>서울 근교 겨울 장박 캠핑</h1><p class="sub">공식 운영·주소와 2026/27 동계 장박 공지를 분리 검증한 후보 지도</p></div><div class="legend"><span><i class="verified"></i>운영 확인</span><span><i class="partial"></i>부분 확인</span><span><i class="unknown"></i>미확인</span></div></header>
-      <section class="notice">출발 핀은 개인정보 보호를 위해 실제 주소·좌표와 다른 <strong>우리 집(문래)</strong> 권역 표시점입니다. 거리·시간은 <strong>네이버 지도 자동차 길찾기 결과</strong>를 직접 조회한 후보에만 표시하며, 대상 명칭/주소가 미확인인 후보는 경로 조회를 보류합니다.</section>
-      <div id="map" aria-label="캠핑장 후보 지도"></div>
-      <section class="footer"><span id="count"></span><span>베이스맵 © OpenStreetMap contributors</span></section>
+      <header><div><p class="eyebrow">LONG-STAY FIELD GUIDE · 2026</p><h1>서울 근교 장박 캠핑</h1><p class="sub">겨울 주말 장박 후보를 지도 위에서 비교하세요.</p></div><div class="legend"><span><i class="verified"></i>운영 확인</span><span><i class="partial"></i>부분 확인</span><span><i class="unknown"></i>미확인</span></div></header>
+      <section class="notice"><strong>우리 집(문래)</strong>는 개인정보 보호를 위한 비정밀 출발 표시점입니다. 실거리·시간은 네이버 자동차 결과를 확인한 후보에만 표시합니다.</section>
+      <section id="map" class="map" aria-label="서울 근교 장박 캠핑 후보 지도">
+        <svg class="base-map" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <rect width="1200" height="760" fill="#f3f0e7"/>
+          <path class="water west-water" d="M-30 214C130 178 209 224 309 239c89 14 134-27 248-24 124 3 158 50 267 56 117 7 220-53 406-29v179c-159-6-233 43-367 35-132-7-169-52-291-49-144 4-194 49-329 28C129 416 73 361-30 378Z"/>
+          <path class="water river" d="M-10 440C145 406 226 484 364 465c120-17 163-100 291-87 116 12 164 84 265 92 116 9 180-46 301-28v42c-121-13-183 41-303 29-108-11-155-77-262-88-120-12-166 65-290 83C222 530 148 458-10 493Z"/>
+          <path class="park" d="M77 95c85-70 191-52 251 19 50 59 45 134-10 183-73 65-204 61-266-8C13 241 16 147 77 95Z"/>
+          <path class="park" d="M801 77c85-56 215-31 261 55 38 72 8 161-76 194-105 42-235-5-255-94-15-62 17-119 70-155Z"/>
+          <path class="park soft" d="M491 537c73-47 174-30 215 34 42 65 13 137-59 163-93 34-201-2-224-73-17-53 12-94 68-124Z"/>
+          <g class="roads"><path d="M-10 354C132 330 196 355 310 329S503 246 622 299s166 111 260 76 153-151 328-112"/><path d="M71 702C202 562 322 564 424 472s191-141 309-70 205 81 425 14"/><path d="M214 14C264 120 353 155 416 236s93 141 182 188 174 65 248 151"/><path d="M1034 26C963 109 961 188 899 251s-170 93-226 164-44 143-112 215"/><path d="M-3 598c150-73 245-48 340-11s181 29 253-8 145-59 226-35"/></g>
+          <g class="minor-roads"><path d="M53 155 398 416 755 652"/><path d="M312 6 235 266 398 535 481 755"/><path d="M602 0 653 184 529 364 778 552 1142 692"/><path d="M1153 102 878 376 1021 580"/></g>
+          <g class="labels"><text x="514" y="349">SEOUL</text><text x="335" y="270">GIMPO</text><text x="442" y="119">PAJU</text><text x="158" y="179">INCHEON</text><text x="195" y="514">SIHEUNG</text><text x="821" y="178">YANGJU</text><text x="53" y="300">GANGHWA</text></g>
+        </svg>
+        <div id="pins" class="pins"></div>
+        <aside id="detail" class="detail" aria-live="polite"><div class="detail-empty"><span>핀을 선택하세요</span><p>운영 상태, 실제 길찾기 결과와 예약 정보를 확인할 수 있어요.</p></div></aside>
+        <div class="map-note">CUSTOM FIELD MAP · NOT FOR NAVIGATION</div>
+      </section>
+      <section class="footer"><span id="count"></span><span>지도는 후보 비교를 위한 도식 표현입니다.</span></section>
     </main>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script src="app.js"></script>
   </body>
 </html>
