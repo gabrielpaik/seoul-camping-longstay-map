@@ -15,7 +15,7 @@ const sheet=document.createElement('aside');sheet.className='mobile-sheet';sheet
 const openSheet=html=>{sheet.innerHTML=`<button class="sheet-close" type="button" aria-label="닫기">×</button>${html}`;sheet.classList.add('open');sheet.querySelector('.sheet-close').onclick=()=>sheet.classList.remove('open');};
 const addPopup=(marker,html)=>{marker.bindPopup(html,{autoPan:false,closeButton:true,autoClose:true});marker.on('click',()=>{if(isMobile()){marker.closePopup();openSheet(html)}});return marker;};
 addPopup(L.marker([home.lat,home.lng],{icon:homeIcon,title:home.label,zIndexOffset:1000,autoPanOnFocus:false,keyboard:false}).addTo(map),`<article class="popup"><h2>${home.label}</h2><p>개인정보 보호를 위해 실제 주소·좌표와 다른 문래 권역 표시점입니다.</p></article>`);
-Promise.all([fetch('data.json').then(r=>r.json()),fetch('routes.json').then(r=>r.json())]).then(([items,routes])=>{
+Promise.all([fetch('data.json',{cache:'no-store'}).then(r=>r.json()),fetch('routes.json',{cache:'no-store'}).then(r=>r.json())]).then(([items,routes])=>{
   const confirmed=items.filter(item=>item.coord==='정확 주소 기반');
   confirmed.forEach(item=>{
     const route=routes[item.name]; const color=item.operation==='부분 확인'?'#637172':'#1e5841';
