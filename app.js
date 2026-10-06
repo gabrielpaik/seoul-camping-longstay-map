@@ -18,9 +18,12 @@ function editorialStyle(style) {
     const paint = layer.paint || (layer.paint = {});
     if (id === 'background') paint['background-color'] = '#f3f0e7';
     if (id === 'natural_earth') { paint['raster-opacity'] = 0.12; paint['raster-saturation'] = -1; paint['raster-contrast'] = -0.25; }
-    if (/^park|landcover_(wood|grass|wetland)|landuse_(cemetery|hospital|school)/.test(id)) paint['fill-color'] = '#c5d0b8';
-    if (/^water$|^waterway_/.test(id)) { paint[layer.type === 'line' ? 'line-color' : 'fill-color'] = '#c7dfe1'; if (layer.type === 'line') paint['line-opacity'] = 0.9; }
-    if (/^landuse_residential|^building|^aeroway/.test(id)) { paint['fill-color'] = '#f1eee5'; paint['fill-opacity'] = id === 'building' ? 0.22 : 0.85; }
+    if (/^park|landcover_(wood|grass|wetland)|landuse_(cemetery|hospital|school)/.test(id) && layer.type === 'fill') paint['fill-color'] = '#c5d0b8';
+    if (id === 'water' && layer.type === 'fill') paint['fill-color'] = '#c7dfe1';
+    if (/^waterway_/.test(id) && layer.type === 'line') { paint['line-color'] = '#c7dfe1'; paint['line-opacity'] = 0.9; }
+    if ((id === 'landuse_residential' || id === 'building') && layer.type === 'fill') { paint['fill-color'] = '#f1eee5'; paint['fill-opacity'] = id === 'building' ? 0.22 : 0.85; }
+    if (id === 'building-3d' && layer.type === 'fill-extrusion') { paint['fill-extrusion-color'] = '#e6e1d6'; paint['fill-extrusion-opacity'] = 0.16; }
+    if (id === 'aeroway_fill' && layer.type === 'fill') { paint['fill-color'] = '#f1eee5'; paint['fill-opacity'] = 0.85; }
     if (/^road_.*casing|^tunnel_.*casing|^bridge_.*casing/.test(id)) { paint['line-color'] = '#e1ded6'; paint['line-opacity'] = 0.78; }
     if (/^road_|^tunnel_|^bridge_/.test(id) && layer.type === 'line' && !/casing/.test(id)) { paint['line-color'] = /motorway|trunk|primary/.test(id) ? '#d6cfc1' : '#ece8de'; paint['line-opacity'] = 0.88; }
     if (/^boundary_/.test(id)) { paint['line-color'] = '#8da094'; paint['line-opacity'] = 0.68; paint['line-dasharray'] = [2, 2]; }
