@@ -11,11 +11,13 @@ const statusClass = value => value === '공식/공공 확인' ? 'verified' : val
 const tag = (value, style = '') => `<span class="tag ${style}">${value}</span>`;
 const safeMapLink = item => `https://map.naver.com/p/search/${encodeURIComponent(item.name)}`;
 const kakaoLink = item => `https://map.kakao.com/link/from/${encodeURIComponent(home.label)},${home.lat},${home.lng}/to/${encodeURIComponent(item.name)},${item.lat},${item.lng}`;
+const tentIcon = `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13.25"/><path d="M7.5 22.2 15.9 9.5l8.6 12.7M11.1 22.2l4.8-7.1 4.9 7.1M15.9 15.1v7.1M6.1 23.1h19.8"/></svg>`;
+const homeIcon = `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13.25"/><path d="m8.3 15.1 7.7-6.5 7.7 6.5v8.2H8.3zM13.1 23.3v-5.6h5.8v5.6"/></svg>`;
 
 const homePin = document.createElement('div');
 homePin.className = 'home-marker';
 Object.assign(homePin.style, position(home));
-homePin.innerHTML = `<span>${home.label}</span>`;
+homePin.innerHTML = `${homeIcon}<span>${home.label}</span>`;
 pins.append(homePin);
 
 Promise.all([fetch('data.json').then(r => r.json()), fetch('routes.json').then(r => r.json())]).then(([items, routes]) => {
@@ -37,6 +39,7 @@ Promise.all([fetch('data.json').then(r => r.json()), fetch('routes.json').then(r
     pin.className = `pin-button ${statusClass(item.operation)}`;
     pin.dataset.name = item.name;
     pin.setAttribute('aria-label', `${item.name} 상세 보기`);
+    pin.innerHTML = tentIcon;
     Object.assign(pin.style, position(item));
     pin.addEventListener('mouseenter', () => showDetail(item));
     pin.addEventListener('focus', () => showDetail(item));
