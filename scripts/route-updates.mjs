@@ -14,6 +14,9 @@ for (const item of items) {
   console.log(JSON.stringify({ id: ids.get(item.name), body: { properties: {
     '실제 차량 거리(km)': { number: route?.km ?? null },
     '실제 예상 시간(분)': { number: route?.min ?? null },
+    '위도': { number: item.lat },
+    '경도': { number: item.lng },
+    '좌표': { select: { name: item.coord } },
     '권역': { select: { name: item.region } },
     '운영·주소': { select: { name: item.operation } },
     '주소': { rich_text: [{ text: { content: item.address } }] },
